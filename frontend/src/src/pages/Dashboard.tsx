@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { Equipment } from '../types/types';
+import { useNavigate } from 'react-router-dom';
 import { getEquipmentByStation, checkout, checkin } from '../services/api';
 
 function Dashboard() {
@@ -11,6 +12,7 @@ function Dashboard() {
   );
   const [condition, setCondition] = useState<string>('GOOD');
   const [notes, setNotes] = useState<string>('');
+  const navigate = useNavigate();
 
   const station = localStorage.getItem('station') || '';
   const username = localStorage.getItem('username') || '';
@@ -61,6 +63,10 @@ function Dashboard() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/login');
+  };
   useEffect(() => {
     displayEquipment();
   }, []);
@@ -84,6 +90,12 @@ function Dashboard() {
           <p className="text-white text-sm">
             Station: <span className="font-semibold">{station}</span>
           </p>
+          <button
+            onClick={handleLogout}
+            className="mt-1 text-xs border border-white text-white px-3 py-1 rounded hover:bg-white hover:text-red-800 transition"
+          >
+            Logout
+          </button>
         </div>
       </header>
 
