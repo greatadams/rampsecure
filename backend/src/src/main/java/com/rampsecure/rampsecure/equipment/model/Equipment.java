@@ -1,6 +1,7 @@
 package com.rampsecure.rampsecure.equipment.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.rampsecure.rampsecure.inspection.model.EquipmentType;
 import com.rampsecure.rampsecure.user.model.Station;
 import com.rampsecure.rampsecure.user.model.User;
 import jakarta.persistence.*;
@@ -32,7 +33,8 @@ public class Equipment {
     @Column(nullable = false,unique = true)
     private String equipmentCode;
 
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private EquipmentType equipmentType;
 
     private String model;
 

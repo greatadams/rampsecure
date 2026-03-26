@@ -1,4 +1,4 @@
-import type { CheckoutRequest, CheckoutResponse, CheckingRequest, CheckingResponse, LoginRequest, LoginResponse, Equipment } from "../types/types";
+import type { CheckoutRequest, CheckoutResponse, CheckingRequest, CheckingResponse, LoginRequest, LoginResponse, Equipment,ChecklistItem ,InspectionReportResponse ,StartInspectionRequest,SubmitInspectionRequest} from "../types/types";
 //communication layer with the backend
 
 import axios from "axios";
@@ -42,3 +42,14 @@ export const checkout = (data: CheckoutRequest) =>
 
 export const getEquipmentByStation = (station: string) =>
     api.get<Equipment[]>(`/api/equipment/allEquipmentByStation?station=${station}`)
+
+export const startInspection = (data:StartInspectionRequest) => 
+    api.post<InspectionReportResponse>(`/api/inspection/start`,data)
+
+export const submitInspection = (data:SubmitInspectionRequest) =>
+    api.post<InspectionReportResponse>(`/api/inspection/submit`,data)
+
+export const getChecklist = (equipmentId: string) =>
+    api.get<ChecklistItem[]>(`/api/inspection/checklist/${equipmentId}`)
+
+

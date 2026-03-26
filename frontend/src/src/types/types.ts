@@ -53,3 +53,36 @@ export type CheckingResponse = {
     durationMinutes:number,
     condition:string
 }
+
+
+export type ChecklistItem = {
+    id: string,
+    itemName: string,
+    description: string,
+    isCritical: boolean,
+    template: string
+}
+
+export type StartInspectionRequest = {
+    equipmentId:string
+}
+
+export type SubmitInspectionRequest ={
+    reportId:string,
+    results:ItemResultRequest[]
+}
+
+export type ItemResultRequest = {
+    checkListItemId: string,
+    resultStatus: string,
+    notes:string,
+}
+
+export type InspectionReportResponse  ={
+     reportId:string,
+     checklistStatus:string,
+     equipmentCode:string,
+     inspectedAt:Date,
+     expireAt:Date,
+     hasCriticalFailure:boolean
+}

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Equipment } from '../types/types';
 import { useNavigate } from 'react-router-dom';
 import { getEquipmentByStation, checkout, checkin } from '../services/api';
+import { InspectionModel } from '../components/InspectionModel';
 
 function Dashboard() {
   const [equipment, setEquipment] = useState<Equipment[]>([]);
@@ -17,6 +18,12 @@ function Dashboard() {
   const station = localStorage.getItem('station') || '';
   const username = localStorage.getItem('username') || '';
   const userId = localStorage.getItem('userId') || '';
+
+  //inspection state
+  const [inspectionOpen, setInspectionOpen] = useState<boolean>(false);
+  const [inspectingEquipmentId, setInspectingEquipmentId] = useState<
+    string | null
+  >(null);
 
   const displayEquipment = async () => {
     try {
@@ -70,6 +77,18 @@ function Dashboard() {
   useEffect(() => {
     displayEquipment();
   }, []);
+
+  const handleInspectionClose = () => {
+    setInspectionOpen(false);
+    setInspectingEquipmentId(null);
+  };
+  const handleInspectionPassed = () => {
+    if (inspectingEquipmentId) {
+      handleCheckout(inspectingEquipmentId);
+      setInspectionOpen(false);
+      setInspectingEquipmentId(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -146,7 +165,10 @@ function Dashboard() {
 
               {item.status === 'AVAILABLE' && (
                 <button
-                  onClick={() => handleCheckout(item.id)}
+                  onClick={() => {
+                    setInspectingEquipmentId(item.id);
+                    setInspectionOpen(true);
+                  }}
                   style={{ backgroundColor: '#9a1a2f' }}
                   className="mt-3 w-full text-white py-2 rounded text-sm font-semibold"
                 >
@@ -213,6 +235,18 @@ function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* inspection model */}
+      <InspectionModel
+        equipmentId={inspectingEquipmentId || ''}
+        equipmentCode={
+          equipment.find((e) => e.id === inspectingEquipmentId)
+            ?.equipmentCode || ''
+        }
+        isOpen={inspectionOpen}
+        onClose={handleInspectionClose}
+        onInspectionPassed={handleInspectionPassed}
+      />
     </div>
   );
 }
