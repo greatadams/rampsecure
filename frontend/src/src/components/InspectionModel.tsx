@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 import type { ChecklistItem } from '../types/types';
 import {
+  checkin,
   getChecklist,
+  sendToMaintenance,
   startInspection,
   submitInspection,
+  updateEquipmentStatus,
 } from '../services/api';
 
 type InspectionModalProps = {
@@ -27,6 +30,8 @@ export function InspectionModel({
   const [result, setResult] = useState<Record<string, string>>({});
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [showMaintenanceButton, setShowMaintenanceButton] =
+    useState<boolean>(false);
 
   const displayChecklist = async () => {
     try {
@@ -44,34 +49,66 @@ export function InspectionModel({
     }
   };
 
+  const handleSentToMaintenance = async () => {
+    try {
+      await sendToMaintenance(equipmentId);
+      onClose();
+    } catch (error) {
+      setError('Failed to send equipment to maintenance');
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       setError('');
-      const start = await startInspection({ equipmentId });
-      setReportId(start.data.reportId);
+
+      // only start inspection if we don't have a reportId yet
+      let currentReportId = reportId;
+      if (!currentReportId) {
+        const start = await startInspection({ equipmentId });
+        currentReportId = start.data.reportId;
+        setReportId(currentReportId);
+
+        // if report already submitted, handle based on existing status
+        if (start.data.checklistStatus === 'FAILED') {
+          setError(
+            'Critical items failed. Equipment must be sent to maintenance.',
+          );
+          setShowMaintenanceButton(true);
+          return; // stop here, don't submit again
+        }
+      }
+
+      // for INCOMPLETE or PASSED - always submit new results
       const results = Object.entries(result).map(([itemId, resultStatus]) => ({
         checkListItemId: itemId,
         resultStatus: resultStatus,
         notes: notes[itemId] || '',
       }));
+
       const submit = await submitInspection({
-        reportId: start.data.reportId,
+        reportId: currentReportId,
         results,
       });
 
       if (submit.data.hasCriticalFailure) {
-        setError('Critical items failed. Checkout blocked.');
+        setError(
+          'Critical items failed. Checkout blocked.Equipment must be sent to maintenance',
+        );
+        setShowMaintenanceButton(true);
       } else {
         onInspectionPassed(equipmentId);
       }
     } catch (error) {
-      setError('Error,can submit at the moment');
+      setError('Error,cannot submit at the moment');
     }
   };
 
   useEffect(() => {
     if (!isOpen) return; // don't fetch if modal is closed
-
+    setReportId(null); // reset reportId when modal opens
+    setResult({}); // reset results
+    setNote({}); // reset notes
     displayChecklist();
   }, [equipmentId, isOpen]);
 
@@ -93,6 +130,16 @@ export function InspectionModel({
         <div className="p-6">
           {loading && <p className="text-gray-500">Loading check list...</p>}
           {error && <p className="text-red-600 mb-4">{error}</p>}
+
+          {showMaintenanceButton && (
+            <button
+              onClick={handleSentToMaintenance}
+              style={{ backgroundColor: '#9a1a2f' }}
+              className="w-full text-white py-3 rounded font-semibold mt-3"
+            >
+              Send to Maintenance
+            </button>
+          )}
 
           {/* Checklist Items */}
           <div className="space-y-4">

@@ -52,4 +52,11 @@ export const submitInspection = (data:SubmitInspectionRequest) =>
 export const getChecklist = (equipmentId: string) =>
     api.get<ChecklistItem[]>(`/api/inspection/checklist/${equipmentId}`)
 
+export const updateEquipmentStatus = (equipmentId: string, status: string) => 
+    api.put(`/api/equipment/${equipmentId}/status?status=${status}`)
 
+export const getAllEquipment =() => 
+    api.get<Equipment[]>('/api/equipment/all')
+
+export const sendToMaintenance = (equipmentId: string) =>
+    api.put(`/api/equipment/${equipmentId}/sendToMaintenance`)

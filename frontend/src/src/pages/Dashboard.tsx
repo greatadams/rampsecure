@@ -18,6 +18,7 @@ function Dashboard() {
   const station = localStorage.getItem('station') || '';
   const username = localStorage.getItem('username') || '';
   const userId = localStorage.getItem('userId') || '';
+  const role = localStorage.getItem('role');
 
   //inspection state
   const [inspectionOpen, setInspectionOpen] = useState<boolean>(false);
@@ -37,7 +38,7 @@ function Dashboard() {
       }
 
       const response = await getEquipmentByStation(station);
-      console.log('equipment data:', response.data);
+
       setEquipment(response.data);
     } catch (error) {
       setError('No equipment available');
@@ -105,6 +106,7 @@ function Dashboard() {
         <div className="text-right">
           <p className="text-white text-sm">
             Logged in as: <span className="font-semibold">{username}</span>
+            <span className="font-semibold"> || {role}</span>
           </p>
           <p className="text-white text-sm">
             Station: <span className="font-semibold">{station}</span>
@@ -115,6 +117,19 @@ function Dashboard() {
           >
             Logout
           </button>
+
+          {/* link to the supervisor dashboard  that only shows for the right roles: */}
+
+          {(role === 'SUPERVISOR' ||
+            role === 'SAFETY_OFFICER' ||
+            role === 'ADMIN') && (
+            <button
+              onClick={() => navigate('/supervisor')}
+              className="mt-1 text-xs border border-white text-white px-3 py-1 rounded hover:bg-white hover:text-red-800 transition"
+            >
+              Supervisor Dashboard
+            </button>
+          )}
         </div>
       </header>
 

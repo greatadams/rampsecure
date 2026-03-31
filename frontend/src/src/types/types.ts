@@ -24,7 +24,15 @@ export type Equipment = {
     status:EquipmentStatus,
     station:string,
     location:string,
-    currentOperatorId: string | null
+    currentOperatorId: {
+    id: string
+    username: string
+    firstName: string
+    lastName: string | null,
+    lastCheckoutAt: string | null,
+    equipmentType: string
+    }
+
 }
 
 

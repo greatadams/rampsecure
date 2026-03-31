@@ -40,14 +40,17 @@ public class InspectionService {
 
         if (existing.isPresent()) {
             InspectionReport inspectionReport = existing.get();
-            return  new InspectionReportResponse(
-                    inspectionReport.getId(),
-                    inspectionReport.getStatus(),
-                    inspectionReport.getEquipment().getEquipmentCode(),
-                    inspectionReport.getInspectedAt(),
-                    inspectionReport.getExpiresAt(),
-                    false
-            );
+
+                return  new InspectionReportResponse(
+                        inspectionReport.getId(),
+                        inspectionReport.getStatus(),
+                        inspectionReport.getEquipment().getEquipmentCode(),
+                        inspectionReport.getInspectedAt(),
+                        inspectionReport.getExpiresAt(),
+                        inspectionReport.getStatus() == ChecklistStatus.FAILED
+                );
+
+
         }
 
      //if not inspected
@@ -76,9 +79,9 @@ public class InspectionService {
         //find report id
     InspectionReport report = inspectionReportRepository.findById(reportId).orElseThrow(() -> new RuntimeException("Inspection Report not found"));
     //check if report has been submitted
-       if (report.getStatus() != (ChecklistStatus.INCOMPLETE)) {
-           throw new RuntimeException("Inspection Already submitted");
-       }
+       // delete old results if resubmitting
+       itemResultRepository.deleteAll(itemResultRepository.findByReport(report));
+       report.setStatus(ChecklistStatus.INCOMPLETE);
 
        boolean[] hasCriticalFailure = {false};
        results.forEach(result -> {
