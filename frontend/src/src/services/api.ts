@@ -1,4 +1,4 @@
-import type { CheckoutRequest, CheckoutResponse, CheckingRequest, CheckingResponse, LoginRequest, LoginResponse, Equipment,ChecklistItem ,InspectionReportResponse ,StartInspectionRequest,SubmitInspectionRequest} from "../types/types";
+import type { CheckoutRequest, CheckoutResponse, CheckingRequest, CheckingResponse, LoginRequest, LoginResponse, Equipment,ChecklistItem ,InspectionReportResponse ,StartInspectionRequest,SubmitInspectionRequest, UserResponse} from "../types/types";
 //communication layer with the backend
 
 import axios from "axios";
@@ -60,3 +60,15 @@ export const getAllEquipment =() =>
 
 export const sendToMaintenance = (equipmentId: string) =>
     api.put(`/api/equipment/${equipmentId}/sendToMaintenance`)
+
+export const register = (data: RegisterRequest) =>
+    api.post<LoginResponse>('/api/auth/register', data)
+
+export const getAllUsers=()=>
+    api.get<UserResponse[]>('/api/user/allusers')
+
+export const deleteUser=(id:string)=>
+    api.delete(`/api/user/${id}`)
+
+export const updateUser = (id: string, data: UpdateUserRequest) =>
+    api.put<UserResponse>(`/api/user/${id}`, data)

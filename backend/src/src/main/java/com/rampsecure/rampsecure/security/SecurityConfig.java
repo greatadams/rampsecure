@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/transaction/**").hasAnyAuthority("ROLE_SUPERVISOR", "ROLE_SAFETY_OFFICER","ROLE_ADMIN")
                         .requestMatchers("/api/equipment/all").hasAnyAuthority("ROLE_SUPERVISOR", "ROLE_SAFETY_OFFICER", "ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/equipment/*/status").hasAnyAuthority("ROLE_SUPERVISOR", "ROLE_SAFETY_OFFICER", "ROLE_ADMIN")
+                        .requestMatchers("/api/user/**").hasAnyAuthority("ROLE_ADMIN")
                         .anyRequest().authenticated())
                 //tells Spring to run your JwtFilter before its own authentication filter.
                 .addFilterBefore(jwtFilter,

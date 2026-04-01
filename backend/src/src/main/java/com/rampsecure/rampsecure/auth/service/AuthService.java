@@ -64,7 +64,9 @@ public class AuthService {
         User user = userRepository.findByUsername(loginRequest.getUsername())
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid username or password"));
 
-
+        if (!user.isActive()) {
+            throw new InvalidCredentialsException("Account has been deactivated contact your administrator.");
+        }
         //check the password
         if (!passwordEncoder.matches(loginRequest.getPassword(),user.getPassword())){
             throw new InvalidCredentialsException("Invalid username or password");

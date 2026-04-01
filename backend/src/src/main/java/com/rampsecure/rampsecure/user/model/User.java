@@ -37,4 +37,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Station station;
     private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private boolean isActive = true;
 }

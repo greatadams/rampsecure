@@ -94,3 +94,31 @@ export type InspectionReportResponse  ={
      expireAt:Date,
      hasCriticalFailure:boolean
 }
+
+export type RegisterRequest = {
+    username: string
+    firstName: string
+    lastName: string
+    email: string
+    phoneNumber: string
+    password: string
+    confirmPassword: string
+    role: string
+    station: string
+}
+
+
+export type UserResponse = {
+    id:string
+    firstName: string
+    lastName: string
+    username: string  
+    email: string
+    station:string
+    role:string
+}
+
+export type UpdateUserRequest = {
+    role: string
+    station: string
+}
