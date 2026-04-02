@@ -64,7 +64,7 @@ Runs on `http://localhost:5173`
 | ---------- | ----------- | ----------- |
 | Admin      | admin       | Admin@2026  |
 | Supervisor | supervisor1 | password123 |
-| Operator   | greatadams  | password123 |
+| Operator   | peter       | password123 |
 
 ---
 

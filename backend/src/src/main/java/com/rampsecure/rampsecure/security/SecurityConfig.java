@@ -36,7 +36,6 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         //login and register endpoints are public, everything else requires authentication.
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/transaction/**").hasAnyAuthority("ROLE_SUPERVISOR", "ROLE_SAFETY_OFFICER","ROLE_ADMIN")
                         .requestMatchers("/api/equipment/all").hasAnyAuthority("ROLE_SUPERVISOR", "ROLE_SAFETY_OFFICER", "ROLE_ADMIN")
@@ -52,12 +51,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-//        corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173","https://rampsecure.vercel.app"));
-//        corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-//        corsConfiguration.setAllowedMethods(List.of("*"));
-        corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173", "https://rampsecure.vercel.app"));
+        corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173","https://rampsecure.vercel.app"));
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+        corsConfiguration.setAllowedHeaders(List.of("*"));
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setExposedHeaders(List.of("Authorization"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
