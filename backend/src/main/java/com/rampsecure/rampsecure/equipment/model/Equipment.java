@@ -1,6 +1,9 @@
 package com.rampsecure.rampsecure.equipment.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.rampsecure.rampsecure.inspection.model.EquipmentType;
 import com.rampsecure.rampsecure.user.model.Station;
+import com.rampsecure.rampsecure.user.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,10 +25,16 @@ public class Equipment {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "current_operator_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private User currentOperator;
+
     @Column(nullable = false,unique = true)
     private String equipmentCode;
 
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private EquipmentType equipmentType;
 
     private String model;
 
@@ -38,4 +47,9 @@ public class Equipment {
     private String location;
 
     private LocalDateTime lastCheckoutAt;
+
+
+    public UUID getCurrentOperatorId() {
+        return currentOperator != null ? currentOperator.getId() : null;
+    }
 }

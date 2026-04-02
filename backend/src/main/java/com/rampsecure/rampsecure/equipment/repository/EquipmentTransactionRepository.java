@@ -14,4 +14,5 @@ public interface EquipmentTransactionRepository extends JpaRepository<EquipmentT
     Optional<EquipmentTransaction> findByEquipmentAndStatus(Equipment equipment, TransactionStatus status);
     List<EquipmentTransaction> findByOperator(User operator);
     List<EquipmentTransaction> findByEquipment(Equipment equipment);
+    boolean existsByOperatorAndStatus(User operator, TransactionStatus status);
 }

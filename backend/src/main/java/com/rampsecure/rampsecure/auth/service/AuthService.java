@@ -53,7 +53,7 @@ public class AuthService {
         userRepository.save(newUser);
         // Return response
         String token =jwtUtil.generateToken(newUser.getUsername(),newUser.getRole().name(), newUser.getId(),newUser.getStation().name());
-        return new LoginResponse(token, newUser.getUsername(), newUser.getRole(),newUser.getStation(),LocalDateTime.now().plusHours(8));
+        return new LoginResponse(newUser.getId(),token, newUser.getUsername(), newUser.getRole(),newUser.getStation(),LocalDateTime.now().plusHours(8));
 
     }
 
@@ -64,14 +64,16 @@ public class AuthService {
         User user = userRepository.findByUsername(loginRequest.getUsername())
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid username or password"));
 
-
+        if (!user.isActive()) {
+            throw new InvalidCredentialsException("Account has been deactivated contact your administrator.");
+        }
         //check the password
         if (!passwordEncoder.matches(loginRequest.getPassword(),user.getPassword())){
             throw new InvalidCredentialsException("Invalid username or password");
         }
 
         String token =jwtUtil.generateToken(user.getUsername(),user.getRole().name(), user.getId(),user.getStation().name());
-        return new LoginResponse(token, user.getUsername(), user.getRole(),user.getStation(),LocalDateTime.now().plusHours(8));
+        return new LoginResponse(user.getId(),token, user.getUsername(), user.getRole(),user.getStation(),LocalDateTime.now().plusHours(8));
 
 
     }

@@ -1,5 +1,6 @@
 package com.rampsecure.rampsecure.user.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,9 +17,11 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
     @Column(nullable = false, unique = true)
     private String username;
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
     @Column(nullable = false)
     private String firstName;
@@ -34,4 +37,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Station station;
     private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private boolean isActive = true;
 }

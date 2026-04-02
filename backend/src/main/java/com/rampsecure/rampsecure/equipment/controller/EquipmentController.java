@@ -1,15 +1,14 @@
 package com.rampsecure.rampsecure.equipment.controller;
 
 import com.rampsecure.rampsecure.equipment.model.Equipment;
+import com.rampsecure.rampsecure.equipment.model.EquipmentStatus;
 import com.rampsecure.rampsecure.equipment.service.EquipmentService;
 import com.rampsecure.rampsecure.user.model.Station;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("api/equipment")
@@ -32,6 +31,18 @@ public class EquipmentController {
         return equipmentService.getEquipmentByCode(code);
     }
 
+@PutMapping("/{id}/status")
+    public Equipment updateEquipmentStatus(@PathVariable UUID id, @RequestParam EquipmentStatus status) {
+        return equipmentService.updateEquipmentStatus(id,status);
+}
 
+    @GetMapping("/all")
+    public List<Equipment> getAllEquipment() {
+        return equipmentService.getAllEquipment();
+    }
 
+    @PutMapping("/{id}/sendToMaintenance")
+    public Equipment sendToMaintenance(@PathVariable UUID id) {
+        return equipmentService.updateEquipmentStatus(id, EquipmentStatus.MAINTENANCE);
+    }
 }

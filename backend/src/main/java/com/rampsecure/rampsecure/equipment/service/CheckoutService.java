@@ -5,6 +5,9 @@ import com.rampsecure.rampsecure.equipment.dto.CheckoutResponse;
 import com.rampsecure.rampsecure.equipment.model.*;
 import com.rampsecure.rampsecure.equipment.repository.EquipmentRepository;
 import com.rampsecure.rampsecure.equipment.repository.EquipmentTransactionRepository;
+import com.rampsecure.rampsecure.inspection.model.ChecklistStatus;
+import com.rampsecure.rampsecure.inspection.model.InspectionReport;
+import com.rampsecure.rampsecure.inspection.repository.InspectionReportRepository;
 import com.rampsecure.rampsecure.user.model.User;
 import com.rampsecure.rampsecure.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -20,6 +24,7 @@ public class CheckoutService {
     private final EquipmentRepository equipmentRepository;
     private final EquipmentTransactionRepository equipmentTransactionRepository;
     private final UserRepository userRepository;
+    private final InspectionReportRepository inspectionReportRepository;
 
     public CheckoutResponse checkOut(UUID equipmentId, UUID operatorId) {
         //Check if equipment is available
@@ -38,6 +43,18 @@ public class CheckoutService {
             throw new RuntimeException("Equipment belongs to different stations");
         }
 
+        // check if valid inspection exists for this shift
+        Optional<InspectionReport> inspection = inspectionReportRepository
+                .findByOperatorAndExpiresAtAfter(operator, LocalDateTime.now());
+
+        if (inspection.isEmpty()) {
+            throw new RuntimeException("No valid inspection found for this shift. Complete pre-use inspection first.");
+        }
+
+        if (inspection.get().getStatus() == ChecklistStatus.FAILED) {
+            throw new RuntimeException("Inspection failed critical items. Equipment cannot be checked out.");
+        }
+
        // After all the checks pass,
 
        // Set equipment status to IN_USE
@@ -45,6 +62,7 @@ public class CheckoutService {
         // Set lastCheckoutAt to now
         LocalDateTime now = LocalDateTime.now();
         equipment.setLastCheckoutAt(now);
+        equipment.setCurrentOperator(operator);
 
        // Save the equipment
         Equipment savedEquipment = equipmentRepository.save(equipment);
@@ -53,8 +71,6 @@ public class CheckoutService {
         EquipmentTransaction equipmentTransaction = new EquipmentTransaction();
         equipmentTransaction.setOperator(operator);
         equipmentTransaction.setEquipment(savedEquipment);
-        equipmentTransaction.setCheckoutAt(now);
-        equipmentTransaction.setCheckoutAt(now);
         equipmentTransaction.setCheckoutAt(now);
         equipmentTransaction.setStatus(TransactionStatus.CHECKED_OUT);
 
@@ -95,6 +111,7 @@ public class CheckoutService {
         }else {
             equipment.setStatus(EquipmentStatus.MAINTENANCE);
         }
+        equipment.setCurrentOperator(null);
         equipmentRepository.save(equipment);
 
     //update transaction and save
