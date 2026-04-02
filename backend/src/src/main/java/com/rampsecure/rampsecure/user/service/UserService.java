@@ -21,7 +21,7 @@ public class UserService {
 
     private  final EquipmentTransactionRepository equipmentTransactionRepository;
     private final UserRepository userRepository;
- 
+
 
 
 
