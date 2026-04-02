@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
 import type { ChecklistItem } from '../types/types';
 import {
-  checkin,
   getChecklist,
   sendToMaintenance,
   startInspection,
   submitInspection,
-  updateEquipmentStatus,
 } from '../services/api';
 
 type InspectionModalProps = {
