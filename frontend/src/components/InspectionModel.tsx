@@ -39,7 +39,7 @@ export function InspectionModel({
       const response = await getChecklist(equipmentId);
       //store/save the response of data gotten from the checklist
       setCheckListItems(response.data);
-    } catch (error) {
+    } catch (error: any) {
       setError('checklist for this equipment not  available');
       setCheckListItems([]);
     } finally {
@@ -51,7 +51,7 @@ export function InspectionModel({
     try {
       await sendToMaintenance(equipmentId);
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       setError('Failed to send equipment to maintenance');
     }
   };
@@ -97,7 +97,7 @@ export function InspectionModel({
       } else {
         onInspectionPassed(equipmentId);
       }
-    } catch (error) {
+    } catch (error: any) {
       setError('Error,cannot submit at the moment');
     }
   };

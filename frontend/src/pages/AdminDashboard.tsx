@@ -30,7 +30,7 @@ function AdminDashboard() {
 
       const response = await getAllUsers();
       setExistingUser(response.data);
-    } catch (error) {
+    } catch (error: any) {
       setError('No users in the system');
     } finally {
       setLoading(false);
@@ -51,7 +51,7 @@ function AdminDashboard() {
       setError('');
       await deleteUser(id);
       await displayUsers(); //refresh list
-    } catch (error) {
+    } catch (error: any) {
       setError(
         error.response?.data || 'Unable to remove this user at the moment',
       );
@@ -75,7 +75,7 @@ function AdminDashboard() {
       });
       setCreateUserForm(false);
       await displayUsers();
-    } catch (error) {
+    } catch (error: any) {
       if (error.response?.status === 409) {
         setError('Username or email already exists');
       } else {
@@ -92,7 +92,7 @@ function AdminDashboard() {
       await updateUser(editUser!, { role: role, station: station });
       setEditUser(null);
       await displayUsers();
-    } catch (error) {
+    } catch (error: any) {
       setError('Failed to update user');
     }
   };

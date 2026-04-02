@@ -1,14 +1,30 @@
 import { useEffect, useState } from 'react';
 import type { Equipment } from '../types/types';
-import { getEquipmentByStation } from '../services/api';
+import { useNavigate } from 'react-router-dom';
+import { getEquipmentByStation, checkout, checkin } from '../services/api';
+import { InspectionModel } from '../components/InspectionModel';
 
 function Dashboard() {
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
+  const [checkinEquipmentId, setCheckinEquipmentId] = useState<string | null>(
+    null,
+  );
+  const [condition, setCondition] = useState<string>('GOOD');
+  const [notes, setNotes] = useState<string>('');
+  const navigate = useNavigate();
 
   const station = localStorage.getItem('station') || '';
   const username = localStorage.getItem('username') || '';
+  const userId = localStorage.getItem('userId') || '';
+  const role = localStorage.getItem('role');
+
+  //inspection state
+  const [inspectionOpen, setInspectionOpen] = useState<boolean>(false);
+  const [inspectingEquipmentId, setInspectingEquipmentId] = useState<
+    string | null
+  >(null);
 
   const displayEquipment = async () => {
     try {
@@ -17,24 +33,67 @@ function Dashboard() {
 
       if (!station) {
         setError('No station found. Please log in again.');
+        setEquipment([]);
         return;
       }
+
       const response = await getEquipmentByStation(station);
+
       setEquipment(response.data);
-    } catch (error) {
-      setError('No equipments available');
+    } catch (error: any) {
+      setError('No equipment available');
+      setEquipment([]);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleCheckout = async (equipmentId: string) => {
+    try {
+      setError('');
+      await checkout({ equipmentId });
+      await displayEquipment();
+    } catch (error: any) {
+      setError('Checkout failed');
+    }
+  };
+
+  const handleCheckin = async (equipmentId: string) => {
+    try {
+      setError('');
+      await checkin({ equipmentId, condition, notes });
+      setCheckinEquipmentId(null);
+      setCondition('GOOD');
+      setNotes('');
+      await displayEquipment();
+    } catch (error: any) {
+      setError('Checkin failed');
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/login');
+  };
   useEffect(() => {
     displayEquipment();
   }, []);
 
+  const handleInspectionClose = () => {
+    setInspectionOpen(false);
+    setInspectingEquipmentId(null);
+  };
+  const handleInspectionPassed = () => {
+    if (inspectingEquipmentId) {
+      handleCheckout(inspectingEquipmentId);
+      setInspectionOpen(false);
+      setInspectingEquipmentId(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* header */}
+      {/* Header */}
       <header
         style={{ backgroundColor: '#9a1a2f' }}
         className="p-4 flex justify-between items-center"
@@ -47,22 +106,41 @@ function Dashboard() {
         <div className="text-right">
           <p className="text-white text-sm">
             Logged in as: <span className="font-semibold">{username}</span>
+            <span className="font-semibold"> || {role}</span>
           </p>
           <p className="text-white text-sm">
             Station: <span className="font-semibold">{station}</span>
           </p>
+          <button
+            onClick={handleLogout}
+            className="mt-1 text-xs border border-white text-white px-3 py-1 rounded hover:bg-white hover:text-red-800 transition"
+          >
+            Logout
+          </button>
+
+          {/* link to the supervisor dashboard  that only shows for the right roles: */}
+
+          {(role === 'SUPERVISOR' ||
+            role === 'SAFETY_OFFICER' ||
+            role === 'ADMIN') && (
+            <button
+              onClick={() => navigate('/supervisor')}
+              className="mt-1 text-xs border border-white text-white px-3 py-1 rounded hover:bg-white hover:text-red-800 transition"
+            >
+              Supervisor Dashboard
+            </button>
+          )}
         </div>
       </header>
 
-      {/* Main content*/}
-      <div>
+      {/* Main content */}
+      <main className="p-6">
         <h2 className="text-black text-xl font-semibold mb-4">
           Equipment at {station}
         </h2>
 
         {loading && <p className="text-gray-500">Loading equipment...</p>}
-
-        {error && <p className="text-red-600">{error}</p>}
+        {error && <p className="text-red-600 mb-4">{error}</p>}
 
         {!loading && !error && equipment.length === 0 && (
           <p className="text-gray-500">No equipment found for this station.</p>
@@ -85,20 +163,105 @@ function Dashboard() {
                   {item.status}
                 </span>
               </div>
+
               <p className="text-gray-600 text-sm">{item.type}</p>
               <p className="text-gray-600 text-sm">{item.model}</p>
+
+              {item.status === 'IN_USE' &&
+                item.currentOperatorId?.toString() === userId && (
+                  <button
+                    onClick={() => setCheckinEquipmentId(item.id)}
+                    style={{ backgroundColor: '#9a1a2f' }}
+                    className="mt-3 w-full text-white py-2 rounded text-sm font-semibold"
+                  >
+                    Check In
+                  </button>
+                )}
+
               {item.status === 'AVAILABLE' && (
                 <button
+                  onClick={() => {
+                    setInspectingEquipmentId(item.id);
+                    setInspectionOpen(true);
+                  }}
                   style={{ backgroundColor: '#9a1a2f' }}
                   className="mt-3 w-full text-white py-2 rounded text-sm font-semibold"
                 >
-                  Checkout
+                  Check Out
                 </button>
               )}
             </div>
           ))}
         </div>
-      </div>
+      </main>
+
+      {/* Checkin Modal */}
+      {checkinEquipmentId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+            <h3 className="text-black text-lg font-bold mb-4">
+              Check In Equipment
+            </h3>
+
+            <label className="block text-gray-700 text-sm font-semibold mb-1">
+              Condition
+            </label>
+            <select
+              value={condition}
+              onChange={(e) => setCondition(e.target.value)}
+              className="w-full border border-gray-300 rounded p-3 mb-4 text-black"
+            >
+              <option value="GOOD">Good</option>
+              <option value="DAMAGED">Damaged</option>
+              <option value="NEEDS_MAINTENANCE">Needs Maintenance</option>
+            </select>
+
+            <label className="block text-gray-700 text-sm font-semibold mb-1">
+              Notes
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Describe any issues or observations..."
+              rows={3}
+              className="w-full border border-gray-300 rounded p-3 mb-4 text-black text-sm"
+            />
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleCheckin(checkinEquipmentId)}
+                style={{ backgroundColor: '#9a1a2f' }}
+                className="flex-1 text-white py-3 rounded font-semibold"
+              >
+                Confirm Check In
+              </button>
+
+              <button
+                onClick={() => {
+                  setCheckinEquipmentId(null);
+                  setCondition('GOOD');
+                  setNotes('');
+                }}
+                className="flex-1 border border-gray-300 text-gray-600 py-3 rounded font-semibold"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* inspection model */}
+      <InspectionModel
+        equipmentId={inspectingEquipmentId || ''}
+        equipmentCode={
+          equipment.find((e) => e.id === inspectingEquipmentId)
+            ?.equipmentCode || ''
+        }
+        isOpen={inspectionOpen}
+        onClose={handleInspectionClose}
+        onInspectionPassed={handleInspectionPassed}
+      />
     </div>
   );
 }

@@ -19,7 +19,7 @@ function SupervisorDashboard() {
       const response = await getAllEquipment();
 
       setEquipment(response.data);
-    } catch (error) {
+    } catch (error: any) {
       setError('No Equipment');
     } finally {
       setLoading(false);
@@ -38,7 +38,7 @@ function SupervisorDashboard() {
     try {
       await updateEquipmentStatus(id, 'AVAILABLE');
       await displayAllEquipment(); // refresh the list
-    } catch (error) {
+    } catch (error: any) {
       setError('Failed to clear maintenance');
     }
   };

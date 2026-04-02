@@ -1,29 +1,40 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import { login } from '../services/api';
 
 function Login() {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [error, setError] = useState<string>('');
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      setError('');
       //called login() from service/api
       const response = await login({ username, password });
       //store token
       localStorage.setItem('token', response.data.token);
       //login success login to dashboard
 
+      localStorage.setItem('userId', response.data.id);
       localStorage.setItem('station', response.data.station);
       localStorage.setItem('username', response.data.username);
-      localStorage.setItem('role', response.data.role);
-      navigate('/dashboard');
-    } catch (error) {
-      setError('Invalid username or password');
+
+      const role = response.data.role;
+      localStorage.setItem('role', role);
+
+      if (role === 'ADMIN') {
+        navigate('/admin');
+      } else if (role === 'SUPERVISOR' || role === 'SAFETY_OFFICER') {
+        navigate('/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (error: any) {
+      setError(error.response?.data || 'Invalid username or password');
     }
   };
   return (
@@ -51,13 +62,23 @@ function Login() {
             onChange={(e) => setUsername(e.target.value)}
             className="w-full border border-gray-300 rounded p-3 mb-4 text-black"
           />
-          <input
-            value={password}
-            type="password"
-            placeholder="Enter your password"
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-gray-300 rounded p-3 mb-4 text-black"
-          />
+          <div className="relative mb-4">
+            <input
+              value={password}
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Enter your password"
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border border-gray-300 rounded p-3 text-black pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-3 text-gray-500"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
+
           <button
             type="submit"
             style={{ backgroundColor: '#9a1a2f' }}
@@ -65,7 +86,11 @@ function Login() {
           >
             Sign In
           </button>
-          {error && <p className="text-red-600 mt-3 text-sm">{error}</p>}
+          {error && (
+            <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded mt-3">
+              <p className="font-semibold text-sm">{error}</p>
+            </div>
+          )}
         </form>
       </div>
     </div>
