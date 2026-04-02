@@ -9,7 +9,6 @@ function AdminDashboard() {
   const [createUserForm, setCreateUserForm] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
-  const [userToDelete, setUserToDelete] = useState<string | null>(null);
   const [editUser, setEditUser] = useState<string | null>(null);
   const [firstName, setFirstName] = useState<string>('');
   const [lastName, setLastName] = useState<string>('');
@@ -76,7 +75,7 @@ function AdminDashboard() {
       });
       setCreateUserForm(false);
       await displayUsers();
-    } catch (error: any) {
+    } catch (error) {
       if (error.response?.status === 409) {
         setError('Username or email already exists');
       } else {

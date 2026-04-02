@@ -1,4 +1,4 @@
-import type { CheckoutRequest, CheckoutResponse, CheckingRequest, CheckingResponse, LoginRequest, LoginResponse, Equipment,ChecklistItem ,InspectionReportResponse ,StartInspectionRequest,SubmitInspectionRequest, UserResponse} from "../types/types";
+import type { CheckoutRequest, CheckoutResponse, CheckingRequest, CheckingResponse, LoginRequest, LoginResponse, Equipment,ChecklistItem ,InspectionReportResponse ,StartInspectionRequest,SubmitInspectionRequest, UserResponse,RegisterRequest, UpdateUserRequest} from "../types/types";
 //communication layer with the backend
 
 import axios from "axios";

@@ -19,6 +19,7 @@ export type EquipmentStatus =
 export type Equipment = {
     id:string,
     equipmentCode:string,
+    equipmentType: string
     type:string,
     model:string,
     status:EquipmentStatus,
@@ -29,9 +30,9 @@ export type Equipment = {
     username: string
     firstName: string
     lastName: string | null,
-    lastCheckoutAt: string | null,
-    equipmentType: string
     }
+     lastCheckoutAt: string | null,
+  
 
 }
 
