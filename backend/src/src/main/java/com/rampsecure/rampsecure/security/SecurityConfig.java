@@ -36,6 +36,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         //login and register endpoints are public, everything else requires authentication.
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/transaction/**").hasAnyAuthority("ROLE_SUPERVISOR", "ROLE_SAFETY_OFFICER","ROLE_ADMIN")
                         .requestMatchers("/api/equipment/all").hasAnyAuthority("ROLE_SUPERVISOR", "ROLE_SAFETY_OFFICER", "ROLE_ADMIN")
