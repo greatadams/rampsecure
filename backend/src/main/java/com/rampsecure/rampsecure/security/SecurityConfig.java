@@ -3,6 +3,7 @@ package com.rampsecure.rampsecure.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -36,7 +37,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         //login and register endpoints are public, everything else requires authentication.
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/transaction/**").hasAnyAuthority("ROLE_SUPERVISOR", "ROLE_SAFETY_OFFICER")
+                        .requestMatchers("/api/transaction/**").hasAnyAuthority("ROLE_SUPERVISOR", "ROLE_SAFETY_OFFICER","ROLE_ADMIN")
+                        .requestMatchers("/api/equipment/all").hasAnyAuthority("ROLE_SUPERVISOR", "ROLE_SAFETY_OFFICER", "ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/equipment/*/status").hasAnyAuthority("ROLE_SUPERVISOR", "ROLE_SAFETY_OFFICER", "ROLE_ADMIN")
+                        .requestMatchers("/api/user/**").hasAnyAuthority("ROLE_ADMIN")
                         .anyRequest().authenticated())
                 //tells Spring to run your JwtFilter before its own authentication filter.
                 .addFilterBefore(jwtFilter,
@@ -47,10 +51,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173"));
+        corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173","https://rampsecure.vercel.app"));
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        corsConfiguration.setAllowedMethods(List.of("*"));
         corsConfiguration.setAllowedHeaders(List.of("*"));
+        corsConfiguration.setAllowCredentials(true);
+        corsConfiguration.setExposedHeaders(List.of("Authorization"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);
         return source;
