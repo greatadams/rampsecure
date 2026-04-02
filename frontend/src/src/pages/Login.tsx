@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import { login } from '../services/api';
 
 function Login() {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [error, setError] = useState<string>('');
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const submit = async (e: React.FormEvent) => {
@@ -60,13 +62,23 @@ function Login() {
             onChange={(e) => setUsername(e.target.value)}
             className="w-full border border-gray-300 rounded p-3 mb-4 text-black"
           />
-          <input
-            value={password}
-            type="password"
-            placeholder="Enter your password"
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-gray-300 rounded p-3 mb-4 text-black"
-          />
+          <div className="relative mb-4">
+            <input
+              value={password}
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Enter your password"
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border border-gray-300 rounded p-3 text-black pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-3 text-gray-500"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
+
           <button
             type="submit"
             style={{ backgroundColor: '#9a1a2f' }}

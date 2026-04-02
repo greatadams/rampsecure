@@ -1,5 +1,8 @@
 package com.rampsecure.rampsecure.user.service;
 
+import com.rampsecure.rampsecure.equipment.model.TransactionStatus;
+import com.rampsecure.rampsecure.equipment.repository.EquipmentRepository;
+import com.rampsecure.rampsecure.equipment.repository.EquipmentTransactionRepository;
 import com.rampsecure.rampsecure.user.dto.UserResponse;
 import com.rampsecure.rampsecure.user.model.Role;
 import com.rampsecure.rampsecure.user.model.Station;
@@ -15,13 +18,12 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private UserRepository userRepository;
-    private User user;
 
-    @Autowired
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    private  final EquipmentTransactionRepository equipmentTransactionRepository;
+    private final UserRepository userRepository;
+ 
+
+
 
     //get all users
     //Gets all users from DB
@@ -70,6 +72,13 @@ public class UserService {
     public void deleteUser(UUID id) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean hasActiveCheckout = equipmentTransactionRepository.existsByOperatorAndStatus(existingUser, TransactionStatus.CHECKED_OUT);
+
+        if (hasActiveCheckout) {
+            throw new RuntimeException("Cannot deactivate user. They have equipment currently checked out. Ensure all equipment is returned first.");
+        }
+
         existingUser.setActive(false);
         userRepository.save(existingUser);
     }

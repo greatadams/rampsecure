@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { UserResponse } from '../types/types.ts';
 import { register, updateUser, getAllUsers, deleteUser } from '../services/api';
+import { Eye, EyeOff } from 'lucide-react';
 
 function AdminDashboard() {
   const [existingUser, setExistingUser] = useState<UserResponse[]>([]);
@@ -17,6 +18,7 @@ function AdminDashboard() {
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [role, setRole] = useState<string>('');
   const [station, setStation] = useState<string>('');
 
@@ -51,7 +53,9 @@ function AdminDashboard() {
       await deleteUser(id);
       await displayUsers(); //refresh list
     } catch (error) {
-      setError('unable to remove this user at the moment');
+      setError(
+        error.response?.data || 'Unable to remove this user at the moment',
+      );
     }
   };
 
@@ -154,51 +158,78 @@ function AdminDashboard() {
               Register New User
             </h2>
             {/* form fields go here */}
-            <form id="myForm">
+            <form id="myForm" className="grid grid-cols-2 gap-4">
               <input
                 value={username} //displays what's currently in the state
                 onChange={(e) => setUsername(e.target.value)} //every keystroke updates the state with what the user typed
                 type="text"
                 placeholder="Enter Username"
+                className="w-full border border-gray-300 rounded p-3 text-black"
               />
               <input
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 type="text"
                 placeholder="Enter firstName"
+                className="w-full border border-gray-300 rounded p-3 text-black"
               />
               <input
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 type="text"
                 placeholder="Enter lastName"
+                className="w-full border border-gray-300 rounded p-3 text-black"
               />
               <input
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 type="email"
                 placeholder="Enter email"
+                className="w-full border border-gray-300 rounded p-3 text-black"
               />
               <input
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 type="text"
                 placeholder="Enter phoneNumber"
+                className="w-full border border-gray-300 rounded p-3 text-black"
               />
 
-              <input
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                type="password"
-                placeholder="Enter  password"
-              />
+              <div className="relative mb-4">
+                <input
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Enter  password"
+                  className="w-full border border-gray-300 rounded p-3 text-black pr-10"
+                />
 
-              <input
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                type="password"
-                placeholder="Enter confirm password"
-              />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-gray-500"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+
+              <div className="relative mb-4">
+                <input
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Enter confirm password"
+                  className="w-full border border-gray-300 rounded p-3 text-black pr-10"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-gray-500"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
 
               <select
                 value={role}
@@ -213,6 +244,7 @@ function AdminDashboard() {
               <select
                 value={station}
                 onChange={(e) => setStation(e.target.value)}
+                className="w-full border border-gray-300 rounded p-3 text-black"
               >
                 <option value="">Select Station</option>
                 <option value="YBR">Brandon (YBR)</option>
@@ -223,7 +255,12 @@ function AdminDashboard() {
                 <option value="YSJ">Saint John (YSJ)</option>
               </select>
 
-              <button type="button" onClick={handleCreateUser}>
+              <button
+                type="button"
+                onClick={handleCreateUser}
+                style={{ backgroundColor: '#9a1a2f' }}
+                className="col-span-2 text-white py-3 rounded font-semibold mt-2"
+              >
                 Submit
               </button>
             </form>
