@@ -59,6 +59,33 @@ function AdminDashboard() {
   };
 
   const handleCreateUser = async () => {
+    // basic frontend validation
+    if (
+      !username ||
+      !firstName ||
+      !lastName ||
+      !email ||
+      !phoneNumber ||
+      !password ||
+      !confirmPassword ||
+      !role ||
+      !station
+    ) {
+      setError('All fields are required');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters');
+      return;
+    }
+    if (phoneNumber.length < 10) {
+      setError('Enter a valid phone number');
+      return;
+    }
     try {
       setLoading(true);
       setError('');
