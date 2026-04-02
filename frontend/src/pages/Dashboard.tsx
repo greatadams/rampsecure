@@ -130,6 +130,14 @@ function Dashboard() {
               Supervisor Dashboard
             </button>
           )}
+          {role === 'ADMIN' && (
+            <button
+              onClick={() => navigate('/admin')}
+              className="mt-1 text-xs border border-white text-white px-3 py-1 rounded hover:bg-white hover:text-red-800 transition"
+            >
+              Admin Dashboard
+            </button>
+          )}
         </div>
       </header>
 
