@@ -9,6 +9,8 @@ import com.rampsecure.rampsecure.security.JwtUtil;
 import com.rampsecure.rampsecure.user.model.User;
 import com.rampsecure.rampsecure.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
+
     //Register
     public LoginResponse register(RegisterRequest registerRequest) {
         // Check username exists
@@ -29,6 +33,10 @@ public class AuthService {
         }
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
             throw new UserAlreadyExistsException("Email already exists");
+        }
+
+        if (userRepository.existsByPhoneNumber(registerRequest.getPhoneNumber())) {
+            throw new UserAlreadyExistsException("Phone number already in use");
         }
         // Check passwords match
         if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
@@ -45,6 +53,8 @@ public class AuthService {
         newUser.setRole(registerRequest.getRole());
         newUser.setStation(registerRequest.getStation());
         newUser.setCreatedAt(LocalDateTime.now());
+        newUser.setActive(true);
+
 
         // Encode password
         String hashPassword= passwordEncoder.encode(registerRequest.getPassword());
@@ -59,19 +69,26 @@ public class AuthService {
 
     //LOGIN
     public  LoginResponse login(LoginRequest loginRequest) {
-
+        log.info("Login attempt for username: {}", loginRequest.getUsername());
         //check if username is in the DB
-        User user = userRepository.findByUsername(loginRequest.getUsername())
-                .orElseThrow(() -> new InvalidCredentialsException("Invalid username or password"));
+        User user = userRepository.findByUsernameOrEmail(loginRequest.getUsername(),loginRequest.getUsername())
+                .orElseThrow(() -> {
+                    log.warn("User not found: {}", loginRequest.getUsername());
+                    return new InvalidCredentialsException("Invalid username or password");
+                });
+        log.info("User found: {}, isActive: {}", user.getUsername(), user.isActive());
+
+
 
         if (!user.isActive()) {
+            log.warn("Account inactive: {}", user.getUsername());
             throw new InvalidCredentialsException("Account has been deactivated contact your administrator.");
         }
         //check the password
-        if (!passwordEncoder.matches(loginRequest.getPassword(),user.getPassword())){
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            log.warn("Password mismatch for: {}", user.getUsername());
             throw new InvalidCredentialsException("Invalid username or password");
         }
-
         String token =jwtUtil.generateToken(user.getUsername(),user.getRole().name(), user.getId(),user.getStation().name());
         return new LoginResponse(user.getId(),token, user.getUsername(), user.getRole(),user.getStation(),LocalDateTime.now().plusHours(8));
 
